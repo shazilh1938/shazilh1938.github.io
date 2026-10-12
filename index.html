@@ -399,10 +399,19 @@
     <!-- MAIN MENU SCREEN -->
     <div id="main-menu">
         <h2>Select a Game Mode:</h2>
-        <!-- <button onclick="startGame('face')">👀 Game 1: The Face (Le Visage)</button><br>
-        <button onclick="startGame('body')">🏃‍♂️ Game 2: The Body (Le Corps)</button><br> -->
-        <button onclick="startDragDropGame('en2fr')" style="background-color: #8e44ad;">🧩 Drag and Drop - English to French Game</button><br>
-        <button onclick="startDragDropGame('fr2en')" style="background-color: #6c5ce7;">🧩 Drag and Drop - French to English Game</button><br>
+
+        <div style="margin-bottom: 18px;">
+            <h3 style="margin: 0 0 8px; color: #2c3e50;">Face</h3>
+            <button onclick="startDragDropGame('en2fr', 'face')" style="background-color: #8e44ad;">🧩 Face - English to French</button><br>
+            <button onclick="startDragDropGame('fr2en', 'face')" style="background-color: #6c5ce7;">🧩 Face - French to English</button><br>
+        </div>
+
+        <div style="margin-bottom: 18px;">
+            <h3 style="margin: 0 0 8px; color: #2c3e50;">Body</h3>
+            <button onclick="startDragDropGame('en2fr', 'body')" style="background-color: #8e44ad;">🧩 Body - English to French</button><br>
+            <button onclick="startDragDropGame('fr2en', 'body')" style="background-color: #6c5ce7;">🧩 Body - French to English</button><br>
+        </div>
+
         <button onclick="showLearningMode()" style="background-color: #2ecc71;">📚 Learning Mode</button>
     </div>
 
@@ -867,9 +876,9 @@
         speakText(word, langCode);
     }
 
-    function startDragDropGame(mode = 'en2fr') {
+    function startDragDropGame(mode = 'en2fr', category = 'face') {
         dragGameState.mode = mode;
-        dragGameState.pairs = shuffle(allVocabulary);
+        dragGameState.pairs = shuffle(category === 'body' ? bodyData : faceData);
         dragGameState.matched = [];
         dragGameState.correct = 0;
         dragGameState.wrong = 0;
@@ -888,15 +897,16 @@
         const title = document.getElementById('drag-game-title');
         const leftLabel = document.getElementById('drag-left-label');
         const rightLabel = document.getElementById('drag-right-label');
+        const gameName = category === 'body' ? 'Body' : 'Face';
 
         if (mode === 'fr2en') {
-            title.textContent = '🧩 Drag and Drop - French to English Game';
+            title.textContent = `🧩 ${gameName} - French to English Game`;
             leftLabel.textContent = 'English';
             leftLabel.style.color = '#27ae60';
             rightLabel.textContent = 'French';
             rightLabel.style.color = '#2980b9';
         } else {
-            title.textContent = '🧩 Drag and Drop - English to French Game';
+            title.textContent = `🧩 ${gameName} - English to French Game`;
             leftLabel.textContent = 'French';
             leftLabel.style.color = '#2980b9';
             rightLabel.textContent = 'English';
