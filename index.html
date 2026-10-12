@@ -55,6 +55,34 @@
             box-sizing: border-box;
             line-height: 1.2;
         }
+        .drag-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 0 16px;
+        }
+        .hide-correct-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #f2f6fa;
+            color: #2c3e50;
+            border: 2px solid #dfe6ea;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 0;
+        }
+        .hide-correct-toggle input {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            accent-color: #16a085;
+        }
         .small-action-btn {
             font-size: 18px;
             padding: 12px 18px;
@@ -400,9 +428,15 @@
     <!-- Drag and Drop - English to French GAME SCREEN -->
     <div id="drag-drop-screen" class="hidden">
         <h2 id="drag-game-title">🧩 Drag and Drop - English to French Game</h2>
-        <button onclick="openDragInstructions()" style="background-color: #f39c12; font-size: 18px; padding: 10px 20px;">🙋‍♀️ Instructions</button>
-        <button id="reshuffle-drag-board" class="small-action-btn" onclick="reshuffleDragBoard()" style="background-color: #16a085;">↻ Reshuffle</button>
-        <button onclick="returnToMenu()" style="background-color: #ab41e1; font-size: 18px; padding: 10px 20px;">🏠 Back to Menu</button>
+        <div class="drag-toolbar">
+            <button onclick="openDragInstructions()" style="background-color: #f39c12; font-size: 18px; padding: 10px 20px;">🙋‍♀️ Instructions</button>
+            <button id="reshuffle-drag-board" class="small-action-btn" onclick="reshuffleDragBoard()" style="background-color: #16a085;">↻ Reshuffle</button>
+            <button onclick="returnToMenu()" style="background-color: #ab41e1; font-size: 18px; padding: 10px 20px;">🏠 Back to Menu</button>
+            <label class="hide-correct-toggle" for="hide-correct-answers-toggle">
+                <input id="hide-correct-answers-toggle" type="checkbox" />
+                <span>Hide Correct Answers</span>
+            </label>
+        </div>
         <div class="scoreboard">
             <span>Correct: <strong id="drag-correct">0</strong></span>
             <span>Incorrect: <strong id="drag-wrong">0</strong></span>
@@ -524,6 +558,11 @@
         leftOrder: [],
         rightOrder: []
     };
+
+    function getHideCorrectAnswersChecked() {
+        const checkbox = document.getElementById('hide-correct-answers-toggle');
+        return checkbox ? checkbox.checked : false;
+    }
 
     function syncDragLeftOrder() {
         const getTargetValue = (pair) => (dragGameState.mode === 'en2fr' ? pair.fr : pair.en);
@@ -792,6 +831,11 @@
         dragGameState.wrong = 0;
         dragGameState.total = dragGameState.pairs.length;
 
+        const hideCheckbox = document.getElementById('hide-correct-answers-toggle');
+        if (hideCheckbox) {
+            hideCheckbox.checked = false;
+        }
+
         const getTargetValue = (pair) => (mode === 'en2fr' ? pair.fr : pair.en);
         const getAnswerValue = (pair) => (mode === 'en2fr' ? pair.en : pair.fr);
         dragGameState.leftOrder = shuffle(dragGameState.pairs.map(getTargetValue));
@@ -826,6 +870,7 @@
 
     function renderDragDropBoard() {
         const isEnglishToFrench = dragGameState.mode === 'en2fr';
+        const hideCorrectAnswers = getHideCorrectAnswersChecked();
         const targetWords = dragGameState.leftOrder.length
             ? dragGameState.leftOrder
             : [...new Set(dragGameState.pairs.map(item => isEnglishToFrench ? item.fr : item.en))];
@@ -834,7 +879,12 @@
         const targetLang = isEnglishToFrench ? 'fr-FR' : 'en-US';
         const answerLang = isEnglishToFrench ? 'en-US' : 'fr-FR';
 
-        leftContainer.innerHTML = targetWords.map((targetWord) => {
+        const visibleTargetWords = targetWords.filter((targetWord) => {
+            const matchedPair = dragGameState.matched.find(item => (isEnglishToFrench ? item.fr : item.en) === targetWord);
+            return !(hideCorrectAnswers && matchedPair);
+        });
+
+        leftContainer.innerHTML = visibleTargetWords.map((targetWord) => {
             const matchedPair = dragGameState.matched.find(item => (isEnglishToFrench ? item.fr : item.en) === targetWord);
             const matchedAnswer = matchedPair ? (isEnglishToFrench ? matchedPair.en : matchedPair.fr) : '';
 
@@ -1254,6 +1304,13 @@
     function returnToMenu() {
         hideAllScreens();
         setScreenVisibility('main-menu', true);
+    }
+
+    const hideCorrectAnswerToggle = document.getElementById('hide-correct-answers-toggle');
+    if (hideCorrectAnswerToggle) {
+        hideCorrectAnswerToggle.addEventListener('change', () => {
+            renderDragDropBoard();
+        });
     }
 
     const resumeAudioOnInteraction = () => {
