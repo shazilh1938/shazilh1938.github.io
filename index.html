@@ -670,6 +670,7 @@
     <!-- SUMMARY SCREEN -->
     <div id="summary-screen" class="hidden">
         <h2>🎉 Game Completed! 🎉</h2>
+        <div id="summary-game-title" style="font-size: 22px; line-height: 1.5; color: #2c3e50; font-weight: 700; margin: 8px 0 14px;"></div>
         <div id="final-stats" style="font-size: 26px; line-height: 1.6; margin: 20px 0;"></div>
         <div id="wrong-words-summary" class="summary-list hidden"></div>
         <button onclick="returnToMenu()">Play Again / Main Menu</button>
@@ -1486,6 +1487,11 @@
         document.getElementById('drag-drop-screen').classList.add('hidden');
         document.getElementById('summary-screen').classList.remove('hidden');
 
+        const summaryGameTitle = document.getElementById('summary-game-title');
+        if (summaryGameTitle) {
+            summaryGameTitle.textContent = getSummaryGameTitle();
+        }
+
         document.getElementById('final-stats').innerHTML = `
             Total Matches: ${dragGameState.total}<br>
             Correct Matches: <span style="color: green;">${dragGameState.correct}</span><br>
@@ -1708,9 +1714,27 @@
         document.getElementById('wrong-count').innerText = wrongCount;
     }
 
+    function getSummaryGameTitle() {
+        const topic = getTopicConfig(currentTopicKey);
+        const topicTitle = topic ? getTopicTitle(topic) : 'French Vocabulary';
+
+        if (dragGameState.mode && !document.getElementById('drag-drop-screen').classList.contains('hidden')) {
+            const modeText = dragGameState.mode === 'fr2en' ? 'French to English' : 'English to French';
+            return `Game: ${topicTitle} - Drag and Drop - ${modeText}`;
+        }
+
+        const promptText = testMode === 'fr2en' ? 'French to English' : 'English to French';
+        return `Game: ${topicTitle} - Drag and Drop - ${promptText}`;
+    }
+
     function showSummary() {
         document.getElementById('game-screen').classList.add('hidden');
         document.getElementById('summary-screen').classList.remove('hidden');
+
+        const summaryGameTitle = document.getElementById('summary-game-title');
+        if (summaryGameTitle) {
+            summaryGameTitle.textContent = getSummaryGameTitle();
+        }
 
         let total = correctCount + wrongCount;
         let percentage = total > 0 ? Math.round((correctCount / total) * 100) : 0;
@@ -1759,6 +1783,11 @@
         if (wrongSummary) {
             wrongSummary.classList.add('hidden');
             wrongSummary.innerHTML = '';
+        }
+
+        const summaryGameTitle = document.getElementById('summary-game-title');
+        if (summaryGameTitle) {
+            summaryGameTitle.textContent = '';
         }
     }
 
