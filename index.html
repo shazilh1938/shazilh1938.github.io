@@ -685,7 +685,7 @@
         {
             key: 'body',
             title: 'Le corps (The body)',
-            shortTitle: 'Le corps',
+            frenchName: 'Le corps',
             englishName: 'The body',
             color: '#7d5fff',
             words: [
@@ -714,7 +714,7 @@
         {
             key: 'face',
             title: 'Le visage (The face)',
-            shortTitle: 'Le visage',
+            frenchName: 'Le visage',
             englishName: 'The face',
             color: '#00a8a8',
             words: [
@@ -1130,7 +1130,7 @@
         const config = getTopicConfig(topicKey);
         if (!config) return;
 
-        const frenchText = config.shortTitle || config.title;
+        const frenchText = config.frenchName || config.title;
         const englishText = config.englishName || config.title;
 
         await ensureSpeechReady();
