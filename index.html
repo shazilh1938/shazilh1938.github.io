@@ -472,27 +472,8 @@
     <div id="main-menu">
         <div class="menu-panel">
             <h2 class="menu-title">Choose a topic</h2>
-
-            <div class="topic-grid">
-                <button class="menu-btn topic-btn" data-topic-label="body" onclick="showTopicMenu('body')" style="background-color: #7d5fff;">Le corps (The body)</button>
-                <button class="menu-btn topic-btn" data-topic-label="face" onclick="showTopicMenu('face')" style="background-color: #00a8a8;">Le visage (The face)</button>
-            </div>
-
-            <div id="topic-submenu-body" class="submenu-panel hidden">
-                <div class="menu-buttons">
-                    <button class="menu-btn" onclick="startDragDropGame('en2fr', 'body')" style="background-color: #8e44ad;">🧩 Drag and Drop - English to French</button>
-                    <button class="menu-btn" onclick="startDragDropGame('fr2en', 'body')" style="background-color: #6c5ce7;">🧩 Drag and Drop - French to English</button>
-                    <button class="menu-btn" onclick="showLearningMode('body')" style="background-color: #2ecc71;">📚 Learning Mode</button>
-                </div>
-            </div>
-
-            <div id="topic-submenu-face" class="submenu-panel hidden">
-                <div class="menu-buttons">
-                    <button class="menu-btn" onclick="startDragDropGame('en2fr', 'face')" style="background-color: #8e44ad;">🧩 Drag and Drop - English to French</button>
-                    <button class="menu-btn" onclick="startDragDropGame('fr2en', 'face')" style="background-color: #6c5ce7;">🧩 Drag and Drop - French to English</button>
-                    <button class="menu-btn" onclick="showLearningMode('face')" style="background-color: #2ecc71;">📚 Learning Mode</button>
-                </div>
-            </div>
+            <div id="topic-grid" class="topic-grid"></div>
+            <div id="topic-submenus"></div>
         </div>
     </div>
 
@@ -601,25 +582,72 @@
 </div>
 
 <script>
-    const topicConfig = {
-        body: {
+    const topics = [
+        {
             key: 'body',
             title: 'Le corps (The body)',
             shortTitle: 'Le corps',
             englishName: 'The body',
-            heading: 'Le corps (The body)'
+            heading: 'Le corps (The body)',
+            color: '#7d5fff',
+            words: [
+                { fr: "une tête", en: "head", x: 225, y: 50, textX: 225, textY: 25 },
+                { fr: "des cheveux", en: "hair", x: 225, y: 30, textX: 70, textY: 30 },
+                { fr: "le visage", en: "face", x: 225, y: 70, textX: 370, textY: 60 },
+                { fr: "un cou", en: "neck", x: 225, y: 115, textX: 370, textY: 115 },
+                { fr: "l'épaule", en: "shoulder", x: 170, y: 135, textX: 60, textY: 135 },
+                { fr: "le bras", en: "arm", x: 140, y: 180, textX: 50, textY: 180 },
+                { fr: "une aisselle", en: "armpit", x: 170, y: 155, textX: 60, textY: 150 },
+                { fr: "le cœur", en: "heart", x: 225, y: 150, textX: 360, textY: 130 },
+                { fr: "un doigt", en: "finger", x: 140, y: 220, textX: 50, textY: 220 },
+                { fr: "la peau", en: "skin", x: 225, y: 180, textX: 360, textY: 160 },
+                { fr: "le coude", en: "elbow", x: 170, y: 180, textX: 60, textY: 185 },
+                { fr: "le ventre", en: "belly", x: 225, y: 210, textX: 360, textY: 210 },
+                { fr: "le genou (les genoux)", en: "knee", x: 200, y: 215, textX: 360, textY: 220 },
+                { fr: "un dos", en: "back", x: 225, y: 180, textX: 360, textY: 160 },
+                { fr: "le derrière (les fesses)", en: "butt", x: 225, y: 260, textX: 360, textY: 260 },
+                { fr: "la dent", en: "teeth", x: 225, y: 200, textX: 360, textY: 220 },
+                { fr: "un ongle", en: "nails", x: 140, y: 240, textX: 50, textY: 240 },
+                { fr: "la main", en: "hand", x: 115, y: 240, textX: 40, textY: 250 },
+                { fr: "la jambe", en: "leg", x: 200, y: 220, textX: 370, textY: 220 },
+                { fr: "le pied", en: "foot", x: 190, y: 285, textX: 370, textY: 285 }
+            ]
         },
-        face: {
+        {
             key: 'face',
             title: 'Le visage (The face)',
             shortTitle: 'Le visage',
             englishName: 'The face',
-            heading: 'Le visage (The face)'
+            heading: 'Le visage (The face)',
+            color: '#00a8a8',
+            words: [
+                { fr: "un front", en: "forehead", x: 225, y: 65, textX: 225, textY: 30 },
+                { fr: "le sourcil", en: "eyebrow", x: 175, y: 95, textX: 70, textY: 60 },
+                { fr: "des yeux", en: "eyes", x: 225, y: 120, textX: 360, textY: 100 },
+                { fr: "une oreille", en: "ear", x: 140, y: 140, textX: 50, textY: 140 },
+                { fr: "le nez", en: "nose", x: 225, y: 160, textX: 360, textY: 160 },
+                { fr: "la bouche", en: "mouth", x: 225, y: 210, textX: 360, textY: 220 },
+                { fr: "la langue", en: "tongue", x: 225, y: 230, textX: 70, textY: 240 },
+                { fr: "la joue", en: "cheek", x: 270, y: 170, textX: 370, textY: 190 },
+                { fr: "le menton", en: "chin", x: 225, y: 210, textX: 360, textY: 220 },
+                { fr: "une lèvre", en: "lips", x: 225, y: 210, textX: 360, textY: 220 },
+                { fr: "un œil", en: "eye", x: 225, y: 120, textX: 360, textY: 100 },
+                { fr: "les cils", en: "eyelashes", x: 225, y: 120, textX: 360, textY: 100 },
+                { fr: "une barbe", en: "beard", x: 225, y: 150, textX: 360, textY: 130 },
+                { fr: "une moustache", en: "moustache", x: 225, y: 150, textX: 360, textY: 130 }
+            ]
         }
-    };
+    ];
+
+    const topicConfig = Object.fromEntries(topics.map((topic) => [topic.key, topic]));
+    const topicMap = topicConfig;
 
     function getTopicConfig(topicKey) {
-        return topicConfig[topicKey] || topicConfig.face;
+        return topicMap[topicKey] || topics[0];
+    }
+
+    function getTopicWords(topicKey) {
+        return getTopicConfig(topicKey).words || [];
     }
 
     function applyTopicLabels() {
@@ -631,50 +659,32 @@
         });
     }
 
+    function renderTopicMenu() {
+        const grid = document.getElementById('topic-grid');
+        const submenus = document.getElementById('topic-submenus');
+
+        if (!grid || !submenus) return;
+
+        grid.innerHTML = topics.map((topic) => `
+            <button class="menu-btn topic-btn" data-topic-key="${topic.key}" onclick="showTopicMenu('${topic.key}')" style="background-color: ${topic.color};">${topic.title}</button>
+        `).join('');
+
+        submenus.innerHTML = topics.map((topic) => `
+            <div id="topic-submenu-${topic.key}" class="submenu-panel hidden" data-topic-key="${topic.key}">
+                <div class="menu-buttons">
+                    <button class="menu-btn" onclick="startDragDropGame('en2fr', '${topic.key}')" style="background-color: #8e44ad;">🧩 Drag and Drop - English to French</button>
+                    <button class="menu-btn" onclick="startDragDropGame('fr2en', '${topic.key}')" style="background-color: #6c5ce7;">🧩 Drag and Drop - French to English</button>
+                    <button class="menu-btn" onclick="showLearningMode('${topic.key}')" style="background-color: #2ecc71;">📚 Learning Mode</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderTopicMenu();
     applyTopicLabels();
 
-    // Vocabulary datasets
-    const faceData = [
-        { fr: "un front", en: "forehead", x: 225, y: 65, textX: 225, textY: 30 },
-        { fr: "le sourcil", en: "eyebrow", x: 175, y: 95, textX: 70, textY: 60 },
-        { fr: "des yeux", en: "eyes", x: 225, y: 120, textX: 360, textY: 100 },
-        { fr: "une oreille", en: "ear", x: 140, y: 140, textX: 50, textY: 140 },
-        { fr: "le nez", en: "nose", x: 225, y: 160, textX: 360, textY: 160 },
-        { fr: "la bouche", en: "mouth", x: 225, y: 210, textX: 360, textY: 220 },
-        { fr: "la langue", en: "tongue", x: 225, y: 230, textX: 70, textY: 240 },
-        { fr: "la joue", en: "cheek", x: 270, y: 170, textX: 370, textY: 190 },
-        { fr: "le menton", en: "chin", x: 225, y: 210, textX: 360, textY: 220 },
-        { fr: "une lèvre", en: "lips", x: 225, y: 210, textX: 360, textY: 220 },
-        { fr: "un œil", en: "eye", x: 225, y: 120, textX: 360, textY: 100 },
-        { fr: "les cils", en: "eyelashes", x: 225, y: 120, textX: 360, textY: 100 },
-        { fr: "une barbe", en: "beard", x: 225, y: 150, textX: 360, textY: 130 },
-        { fr: "une moustache", en: "moustache", x: 225, y: 150, textX: 360, textY: 130 }
-    ];
-
-    const bodyData = [
-        { fr: "une tête", en: "head", x: 225, y: 50, textX: 225, textY: 25 },
-        { fr: "des cheveux", en: "hair", x: 225, y: 30, textX: 70, textY: 30 },
-        { fr: "le visage", en: "face", x: 225, y: 70, textX: 370, textY: 60 },
-        { fr: "un cou", en: "neck", x: 225, y: 115, textX: 370, textY: 115 },
-        { fr: "l'épaule", en: "shoulder", x: 170, y: 135, textX: 60, textY: 135 },
-        { fr: "le bras", en: "arm", x: 140, y: 180, textX: 50, textY: 180 },
-        { fr: "une aisselle", en: "armpit", x: 170, y: 155, textX: 60, textY: 150 },
-        { fr: "le cœur", en: "heart", x: 225, y: 150, textX: 360, textY: 130 },
-        { fr: "un doigt", en: "finger", x: 140, y: 220, textX: 50, textY: 220 },
-        { fr: "la peau", en: "skin", x: 225, y: 180, textX: 360, textY: 160 },
-        { fr: "le coude", en: "elbow", x: 170, y: 180, textX: 60, textY: 185 },
-        { fr: "le ventre", en: "belly", x: 225, y: 210, textX: 360, textY: 210 },
-        { fr: "le genou (les genoux)", en: "knee", x: 200, y: 215, textX: 360, textY: 220 },
-        { fr: "un dos", en: "back", x: 225, y: 180, textX: 360, textY: 160 },
-        { fr: "le derrière (les fesses)", en: "butt", x: 225, y: 260, textX: 360, textY: 260 },
-        { fr: "la dent", en: "teeth", x: 225, y: 200, textX: 360, textY: 220 },
-        { fr: "un ongle", en: "nails", x: 140, y: 240, textX: 50, textY: 240 },
-        { fr: "la main", en: "hand", x: 115, y: 240, textX: 40, textY: 250 },
-        { fr: "la jambe", en: "leg", x: 200, y: 220, textX: 370, textY: 220 },
-        { fr: "le pied", en: "foot", x: 190, y: 285, textX: 370, textY: 285 }
-    ];
-
     let currentDataset = [];
+    let currentTopicKey = 'face';
     let currentIndex = 0;
     let score = 0;
     let correctCount = 0;
@@ -685,7 +695,6 @@
     const encouragingPhrases = [
         "Great job!", "Fantastic!", "Super!", "Magnifique!", "You got it!", "Excellent work!", "Awesome!"
     ];
-    const allVocabulary = [...faceData, ...bodyData];
 
     const dragGameState = {
         pairs: [],
@@ -804,12 +813,14 @@
     }
 
     function showTopicMenu(topic) {
-        ['body', 'face'].forEach((item) => {
-            const button = document.querySelector(`#main-menu .topic-btn[onclick*="showTopicMenu('${item}')"]`);
-            if (button) {
-                button.classList.toggle('selected', item === topic);
-            }
-            setScreenVisibility(`topic-submenu-${item}`, item === topic);
+        const selectedTopic = topic || topics[0].key;
+        document.querySelectorAll('#main-menu .topic-btn').forEach((button) => {
+            button.classList.toggle('selected', button.dataset.topicKey === selectedTopic);
+        });
+
+        document.querySelectorAll('#topic-submenus .submenu-panel').forEach((panel) => {
+            const isSelected = panel.dataset.topicKey === selectedTopic;
+            panel.classList.toggle('hidden', !isSelected);
         });
     }
 
@@ -834,10 +845,10 @@
     }
 
     function startGame(type) {
-        currentDataset = [...(type === 'face' ? faceData : bodyData)];
-        // Shuffle dataset for variety
+        currentTopicKey = type || currentTopicKey;
+        currentDataset = [...getTopicWords(currentTopicKey)];
         currentDataset.sort(() => Math.random() - 0.5);
-        
+
         currentIndex = 0;
         score = 0;
         correctCount = 0;
@@ -850,6 +861,7 @@
     }
 
     function showLearningMode(category = 'face') {
+        currentTopicKey = category;
         const title = document.getElementById('learning-mode-title');
         const config = getTopicConfig(category);
         if (title) {
@@ -862,7 +874,7 @@
     }
 
     function buildLearningMode(category = 'face') {
-        const words = category === 'body' ? bodyData : faceData;
+        const words = getTopicWords(category);
         const vocabularyPairs = [...new Map(words.map(item => [item.fr, item])).values()];
         const learningGrid = document.getElementById('learning-grid');
 
@@ -1009,8 +1021,9 @@
     }
 
     function startDragDropGame(mode = 'en2fr', category = 'face') {
+        currentTopicKey = category;
         dragGameState.mode = mode;
-        dragGameState.pairs = shuffle(category === 'body' ? bodyData : faceData);
+        dragGameState.pairs = shuffle(getTopicWords(category));
         dragGameState.matched = [];
         dragGameState.correct = 0;
         dragGameState.wrong = 0;
@@ -1280,18 +1293,17 @@
         }
 
         currentTarget = currentDataset[currentIndex];
-        // Randomly pick whether to ask English spelling or French spelling
         testMode = Math.random() < 0.5 ? 'en2fr' : 'fr2en';
 
         let instructionText = testMode === 'en2fr' 
             ? "Listen to the English word and spell the <strong>French</strong> translation:" 
             : "Listen to the French word and spell the <strong>English</strong> translation:";
-        
+
         document.getElementById('mode-instruction').innerHTML = instructionText;
         document.getElementById('user-answer').value = "";
         document.getElementById('feedback-area').innerHTML = "";
 
-        drawDiagram(type = (currentDataset === faceData ? 'face' : 'body'), currentTarget);
+        drawDiagram(currentTopicKey, currentTarget);
         speakCurrentPrompt();
         document.getElementById('user-answer').focus();
     }
@@ -1490,13 +1502,8 @@
     function returnToMenu() {
         hideAllScreens();
         setScreenVisibility('main-menu', true);
-        ['body', 'face'].forEach((topic) => {
-            setScreenVisibility(`topic-submenu-${topic}`, false);
-            const button = document.querySelector(`#main-menu .topic-btn[onclick*="showTopicMenu('${topic}')"]`);
-            if (button) {
-                button.classList.remove('selected');
-            }
-        });
+        document.querySelectorAll('#main-menu .topic-btn').forEach((button) => button.classList.remove('selected'));
+        document.querySelectorAll('#topic-submenus .submenu-panel').forEach((panel) => panel.classList.add('hidden'));
     }
 
     const hideCorrectAnswerToggle = document.getElementById('hide-correct-answers-toggle');
