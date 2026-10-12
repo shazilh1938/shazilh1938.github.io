@@ -498,7 +498,7 @@
 
     <!-- LEARNING MODE SCREEN -->
     <div id="learning-screen" class="hidden">
-        <h2 id="learning-mode-title">📚 Learning Mode</h2>
+        <h2 id="learning-mode-title">Le corps (The body)</h2>
         <button onclick="openLearningInstructions()" style="background-color: #f39c12; font-size: 18px; padding: 10px 20px;">🙋‍♀️ Instructions</button>
         <button onclick="returnToMenu()" style="background-color: #ab41e1; font-size: 18px; padding: 10px 20px;">🏠 Back to Menu</button>
 
@@ -821,7 +821,7 @@
         const title = document.getElementById('learning-mode-title');
         const topicName = category === 'body' ? 'Le corps (The body)' : 'Le visage (The face)';
         if (title) {
-            title.textContent = `📚 Learning Mode - ${topicName}`;
+            title.textContent = topicName;
         }
         buildLearningMode(category);
         hideAllScreens();
