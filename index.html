@@ -48,6 +48,13 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transition: 0.2s;
         }
+        .small-action-btn {
+            font-size: 16px;
+            padding: 8px 14px;
+            min-height: 38px;
+            margin: 0 0 0 8px;
+            vertical-align: middle;
+        }
         button:hover {
             background-color: #2980b9;
             transform: scale(1.05);
@@ -381,6 +388,7 @@
     <div id="drag-drop-screen" class="hidden">
         <h2 id="drag-game-title">🧩 Drag and Drop - English to French Game</h2>
         <button onclick="openDragInstructions()" style="background-color: #f39c12; font-size: 18px; padding: 10px 20px;">🙋‍♀️ Instructions</button>
+        <button id="reshuffle-drag-board" class="small-action-btn" onclick="reshuffleDragBoard()" style="background-color: #16a085;">↻ Reshuffle</button>
         <button onclick="returnToMenu()" style="background-color: #ab41e1; font-size: 18px; padding: 10px 20px;">🏠 Back to Menu</button>
         <div class="scoreboard">
             <span>Correct: <strong id="drag-correct">0</strong></span>
@@ -499,8 +507,58 @@
         correct: 0,
         wrong: 0,
         total: 0,
-        mode: 'en2fr'
+        mode: 'en2fr',
+        leftOrder: [],
+        rightOrder: []
     };
+
+    function syncDragLeftOrder() {
+        const getTargetValue = (pair) => (dragGameState.mode === 'en2fr' ? pair.fr : pair.en);
+        const getAnswerValue = (pair) => (dragGameState.mode === 'en2fr' ? pair.en : pair.fr);
+        const matchedTargetValues = new Set(dragGameState.matched.map(getTargetValue));
+
+        const remainingTargets = dragGameState.pairs
+            .filter(pair => !dragGameState.matched.some(matched => matched.fr === pair.fr && matched.en === pair.en))
+            .map(getTargetValue);
+
+        dragGameState.leftOrder = dragGameState.pairs.map((pair) => {
+            const value = getTargetValue(pair);
+            return matchedTargetValues.has(value) ? value : remainingTargets.shift();
+        });
+
+        dragGameState.rightOrder = dragGameState.pairs
+            .filter(pair => !dragGameState.matched.some(matched => matched.fr === pair.fr && matched.en === pair.en))
+            .map(getAnswerValue);
+
+        if (!dragGameState.matched.length) {
+            dragGameState.rightOrder = shuffle(dragGameState.rightOrder);
+        }
+    }
+
+    function reshuffleDragBoard() {
+        const getTargetValue = (pair) => (dragGameState.mode === 'en2fr' ? pair.fr : pair.en);
+        const getAnswerValue = (pair) => (dragGameState.mode === 'en2fr' ? pair.en : pair.fr);
+        const matchedTargetValues = new Set(dragGameState.matched.map(getTargetValue));
+
+        const remainingTargets = shuffle(
+            dragGameState.pairs
+                .filter(pair => !dragGameState.matched.some(matched => matched.fr === pair.fr && matched.en === pair.en))
+                .map(getTargetValue)
+        );
+        const remainingAnswers = shuffle(
+            dragGameState.pairs
+                .filter(pair => !dragGameState.matched.some(matched => matched.fr === pair.fr && matched.en === pair.en))
+                .map(getAnswerValue)
+        );
+
+        dragGameState.leftOrder = dragGameState.pairs.map((pair) => {
+            const value = getTargetValue(pair);
+            return matchedTargetValues.has(value) ? value : remainingTargets.shift();
+        });
+
+        dragGameState.rightOrder = remainingAnswers;
+        renderDragDropBoard();
+    }
 
     function setScreenVisibility(screenId, isVisible) {
         const screen = document.getElementById(screenId);
@@ -711,6 +769,9 @@
         dragGameState.correct = 0;
         dragGameState.wrong = 0;
         dragGameState.total = dragGameState.pairs.length;
+        dragGameState.leftOrder = [];
+        dragGameState.rightOrder = [];
+        syncDragLeftOrder();
 
         const title = document.getElementById('drag-game-title');
         const leftLabel = document.getElementById('drag-left-label');
@@ -741,7 +802,9 @@
 
     function renderDragDropBoard() {
         const isEnglishToFrench = dragGameState.mode === 'en2fr';
-        const targetWords = [...new Set(dragGameState.pairs.map(item => isEnglishToFrench ? item.fr : item.en))];
+        const targetWords = dragGameState.leftOrder.length
+            ? dragGameState.leftOrder
+            : [...new Set(dragGameState.pairs.map(item => isEnglishToFrench ? item.fr : item.en))];
         const leftContainer = document.getElementById('drag-french-list');
         const rightContainer = document.getElementById('drag-english-list');
         const targetLang = isEnglishToFrench ? 'fr-FR' : 'en-US';
@@ -767,11 +830,11 @@
             `;
         }).join('');
 
-        const remainingAnswers = shuffle(
-            dragGameState.pairs
+        const remainingAnswers = dragGameState.rightOrder.length
+            ? dragGameState.rightOrder
+            : dragGameState.pairs
                 .filter(pair => !dragGameState.matched.some(item => item.fr === pair.fr && item.en === pair.en))
-                .map(pair => isEnglishToFrench ? pair.en : pair.fr)
-        );
+                .map(pair => isEnglishToFrench ? pair.en : pair.fr);
 
         rightContainer.innerHTML = remainingAnswers
             .map(word => `<button class="word-chip draggable-word" draggable="true" data-word="${word}">${word}</button>`)
@@ -822,7 +885,7 @@
         if (matchingPair) {
             dragGameState.matched.push(matchingPair);
             dragGameState.correct++;
-            // speakText('Correct', 'en-US');
+            syncDragLeftOrder();
             setTimeout(() => {
                 if ('speechSynthesis' in window) {
                     speakText(matchingPair.fr, 'fr-FR');
