@@ -513,23 +513,40 @@
 <script>
     // Vocabulary datasets
     const faceData = [
-        { fr: "le front", en: "forehead", x: 225, y: 65, textX: 225, textY: 30 },
+        { fr: "un front", en: "forehead", x: 225, y: 65, textX: 225, textY: 30 },
         { fr: "le sourcil", en: "eyebrow", x: 175, y: 95, textX: 70, textY: 60 },
-        { fr: "les yeux", en: "eyes", x: 225, y: 120, textX: 360, textY: 100 },
-        { fr: "les oreilles", en: "ears", x: 140, y: 140, textX: 50, textY: 140 },
+        { fr: "des yeux", en: "eyes", x: 225, y: 120, textX: 360, textY: 100 },
+        { fr: "une oreille", en: "ear", x: 140, y: 140, textX: 50, textY: 140 },
         { fr: "le nez", en: "nose", x: 225, y: 160, textX: 360, textY: 160 },
         { fr: "la bouche", en: "mouth", x: 225, y: 210, textX: 360, textY: 220 },
         { fr: "la langue", en: "tongue", x: 225, y: 230, textX: 70, textY: 240 },
-        { fr: "la joue", en: "cheek", x: 270, y: 170, textX: 370, textY: 190 }
+        { fr: "la joue", en: "cheek", x: 270, y: 170, textX: 370, textY: 190 },
+        { fr: "le menton", en: "chin", x: 225, y: 210, textX: 360, textY: 220 },
+        { fr: "une lèvre", en: "lips", x: 225, y: 210, textX: 360, textY: 220 },
+        { fr: "un œil", en: "eye", x: 225, y: 120, textX: 360, textY: 100 },
+        { fr: "les cils", en: "eyelashes", x: 225, y: 120, textX: 360, textY: 100 },
+        { fr: "une barbe", en: "beard", x: 225, y: 150, textX: 360, textY: 130 },
+        { fr: "une moustache", en: "moustache", x: 225, y: 150, textX: 360, textY: 130 }
     ];
 
     const bodyData = [
-        { fr: "la tête", en: "head", x: 225, y: 50, textX: 225, textY: 25 },
-        { fr: "les cheveux", en: "hair", x: 225, y: 30, textX: 70, textY: 30 },
+        { fr: "une tête", en: "head", x: 225, y: 50, textX: 225, textY: 25 },
+        { fr: "des cheveux", en: "hair", x: 225, y: 30, textX: 70, textY: 30 },
         { fr: "le visage", en: "face", x: 225, y: 70, textX: 370, textY: 60 },
-        { fr: "le cou", en: "neck", x: 225, y: 115, textX: 370, textY: 115 },
+        { fr: "un cou", en: "neck", x: 225, y: 115, textX: 370, textY: 115 },
         { fr: "l'épaule", en: "shoulder", x: 170, y: 135, textX: 60, textY: 135 },
         { fr: "le bras", en: "arm", x: 140, y: 180, textX: 50, textY: 180 },
+        { fr: "une aisselle", en: "armpit", x: 170, y: 155, textX: 60, textY: 150 },
+        { fr: "le cœur", en: "heart", x: 225, y: 150, textX: 360, textY: 130 },
+        { fr: "un doigt", en: "finger", x: 140, y: 220, textX: 50, textY: 220 },
+        { fr: "la peau", en: "skin", x: 225, y: 180, textX: 360, textY: 160 },
+        { fr: "le coude", en: "elbow", x: 170, y: 180, textX: 60, textY: 185 },
+        { fr: "le ventre", en: "belly", x: 225, y: 210, textX: 360, textY: 210 },
+        { fr: "le genou (les genoux)", en: "knee", x: 200, y: 215, textX: 360, textY: 220 },
+        { fr: "un dos", en: "back", x: 225, y: 180, textX: 360, textY: 160 },
+        { fr: "le derrière (les fesses)", en: "butt", x: 225, y: 260, textX: 360, textY: 260 },
+        { fr: "la dent", en: "teeth", x: 225, y: 200, textX: 360, textY: 220 },
+        { fr: "un ongle", en: "nails", x: 140, y: 240, textX: 50, textY: 240 },
         { fr: "la main", en: "hand", x: 115, y: 240, textX: 40, textY: 250 },
         { fr: "la jambe", en: "leg", x: 200, y: 220, textX: 370, textY: 220 },
         { fr: "le pied", en: "foot", x: 190, y: 285, textX: 370, textY: 285 }
