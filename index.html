@@ -69,6 +69,12 @@
             flex-direction: column;
             gap: 10px;
         }
+        #main-menu .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(220px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
         #main-menu .menu-btn {
             width: min(100%, 460px);
             margin: 0 auto;
@@ -78,6 +84,18 @@
             border-radius: 14px;
             box-shadow: 0 6px 12px rgba(52, 73, 94, 0.14);
             letter-spacing: 0.02em;
+        }
+        #main-menu .topic-btn {
+            width: 100%;
+            min-height: 70px;
+            font-size: 24px;
+        }
+        #main-menu .submenu-panel {
+            background: rgba(255,255,255,0.5);
+            border: 2px solid #dfeaf7;
+            border-radius: 16px;
+            padding: 16px 12px 10px;
+            margin-top: 8px;
         }
         #main-menu .menu-btn:hover {
             transform: translateY(-1px);
@@ -445,22 +463,25 @@
     <!-- MAIN MENU SCREEN -->
     <div id="main-menu">
         <div class="menu-panel">
-            <h2 class="menu-title">Choose a game</h2>
+            <h2 class="menu-title">Choose a topic</h2>
 
-            <div class="menu-section">
-                <h3>Le corps (The body)</h3>
+            <div class="topic-grid">
+                <button class="menu-btn topic-btn" onclick="showTopicMenu('body')" style="background-color: #7d5fff;">Le corps (The body)</button>
+                <button class="menu-btn topic-btn" onclick="showTopicMenu('face')" style="background-color: #00a8a8;">Le visage (The face)</button>
+            </div>
+
+            <div id="topic-submenu-body" class="submenu-panel hidden">
                 <div class="menu-buttons">
-                    <button class="menu-btn" onclick="startDragDropGame('en2fr', 'body')" style="background-color: #8e44ad;">🧩 English to French</button>
-                    <button class="menu-btn" onclick="startDragDropGame('fr2en', 'body')" style="background-color: #6c5ce7;">🧩 French to English</button>
+                    <button class="menu-btn" onclick="startDragDropGame('en2fr', 'body')" style="background-color: #8e44ad;">🧩 Drag and Drop - English to French</button>
+                    <button class="menu-btn" onclick="startDragDropGame('fr2en', 'body')" style="background-color: #6c5ce7;">🧩 Drag and Drop - French to English</button>
                     <button class="menu-btn" onclick="showLearningMode('body')" style="background-color: #2ecc71;">📚 Learning Mode</button>
                 </div>
             </div>
 
-            <div class="menu-section">
-                <h3>Le visage (The face)</h3>
+            <div id="topic-submenu-face" class="submenu-panel hidden">
                 <div class="menu-buttons">
-                    <button class="menu-btn" onclick="startDragDropGame('en2fr', 'face')" style="background-color: #8e44ad;">🧩 English to French</button>
-                    <button class="menu-btn" onclick="startDragDropGame('fr2en', 'face')" style="background-color: #6c5ce7;">🧩 French to English</button>
+                    <button class="menu-btn" onclick="startDragDropGame('en2fr', 'face')" style="background-color: #8e44ad;">🧩 Drag and Drop - English to French</button>
+                    <button class="menu-btn" onclick="startDragDropGame('fr2en', 'face')" style="background-color: #6c5ce7;">🧩 Drag and Drop - French to English</button>
                     <button class="menu-btn" onclick="showLearningMode('face')" style="background-color: #2ecc71;">📚 Learning Mode</button>
                 </div>
             </div>
@@ -736,6 +757,15 @@
     function hideAllScreens() {
         ['main-menu', 'learning-screen', 'game-screen', 'summary-screen', 'drag-drop-screen'].forEach((screenId) => {
             setScreenVisibility(screenId, false);
+        });
+        ['body', 'face'].forEach((topic) => {
+            setScreenVisibility(`topic-submenu-${topic}`, false);
+        });
+    }
+
+    function showTopicMenu(topic) {
+        ['body', 'face'].forEach((item) => {
+            setScreenVisibility(`topic-submenu-${item}`, item === topic);
         });
     }
 
@@ -1410,6 +1440,10 @@
     function returnToMenu() {
         hideAllScreens();
         setScreenVisibility('main-menu', true);
+        // Keep the main menu topics visible but hidden submenus reset to default
+        ['body', 'face'].forEach((topic) => {
+            setScreenVisibility(`topic-submenu-${topic}`, false);
+        });
     }
 
     const hideCorrectAnswerToggle = document.getElementById('hide-correct-answers-toggle');
