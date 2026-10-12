@@ -861,11 +861,27 @@
         document.getElementById('drag-grade').innerText = grade;
     }
 
-    function playSuccessTone() {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
+    let appAudioContext = null;
 
-        const audioContext = new AudioContextClass();
+    function ensureAudioReady() {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+
+        if (!appAudioContext) {
+            appAudioContext = new AudioContextClass();
+        }
+
+        if (appAudioContext.state === 'suspended') {
+            appAudioContext.resume();
+        }
+
+        return appAudioContext;
+    }
+
+    function playSuccessTone() {
+        const audioContext = ensureAudioReady();
+        if (!audioContext) return;
+
         const notes = [
             { freq: 392, duration: 0.12 },
             { freq: 523.25, duration: 0.12 },
@@ -893,10 +909,9 @@
     }
 
     function playErrorTone() {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
+        const audioContext = ensureAudioReady();
+        if (!audioContext) return;
 
-        const audioContext = new AudioContextClass();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
 
@@ -1154,6 +1169,12 @@
         setScreenVisibility('main-menu', true);
     }
 
+    const resumeAudioOnInteraction = () => {
+        if (typeof ensureAudioReady === 'function') {
+            ensureAudioReady();
+        }
+    };
+
     if ('speechSynthesis' in window) {
         const resumeSpeechOnInteraction = () => {
             try {
@@ -1163,6 +1184,8 @@
             } catch (error) {
                 console.log('Speech resume on interaction failed:', error);
             }
+
+            resumeAudioOnInteraction();
         };
 
         window.addEventListener('touchstart', resumeSpeechOnInteraction, { passive: true });
@@ -1173,6 +1196,9 @@
             }
             resumeSpeechOnInteraction();
         }, { passive: true });
+    } else {
+        window.addEventListener('touchstart', resumeAudioOnInteraction, { passive: true });
+        window.addEventListener('pointerdown', resumeAudioOnInteraction, { passive: true });
     }
 </script>
 
