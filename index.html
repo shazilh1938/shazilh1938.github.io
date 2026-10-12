@@ -1044,6 +1044,8 @@
         if (!('speechSynthesis' in window)) return null;
 
         const voices = window.speechSynthesis.getVoices();
+        if (!voices.length) return null;
+
         const normalizedLang = (langCode || 'en-US').toLowerCase();
         const shortLang = normalizedLang.split('-')[0];
 
@@ -1052,12 +1054,20 @@
             return voiceLang === normalizedLang || voiceLang.startsWith(shortLang + '-');
         });
 
-        const femaleVoice = languageMatches.find(voice => /female|woman|girl|samantha|zira|aria|victoria|susan|jenny|google us english/i.test(voice.name))
-            || voices.find(voice => /female|woman|girl|samantha|zira|aria|victoria|susan|jenny|google us english/i.test(voice.name));
+        const isFemaleVoice = (voice) => {
+            const name = (voice.name || '').toLowerCase();
+            const gender = (voice.gender || '').toLowerCase();
+            return gender === 'female'
+                || /female|woman|girl|samantha|zira|aria|victoria|susan|jenny|google.*(female|woman)/i.test(name);
+        };
 
-        return femaleVoice
-            || languageMatches[0]
-            || voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith('en'))
+        const femaleLanguageVoice = languageMatches.find(isFemaleVoice)
+            || voices.find(isFemaleVoice);
+
+        if (femaleLanguageVoice) return femaleLanguageVoice;
+
+        return languageMatches[0]
+            || voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith(shortLang))
             || voices[0]
             || null;
     }
@@ -1126,11 +1136,15 @@
         };
 
         window.speechSynthesis.cancel();
-        speakQueued(frenchText, 'fr-FR');
+        speakQueued('You have selected', 'en-US');
+
+        setTimeout(() => {
+            speakQueued(frenchText, 'fr-FR');
+        }, 450);
 
         setTimeout(() => {
             speakQueued(englishText, 'en-US');
-        }, 550);
+        }, 900);
     }
 
     async function playLearningWord(word, langCode) {
