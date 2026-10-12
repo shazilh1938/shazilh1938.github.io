@@ -626,28 +626,51 @@
 
         const voices = window.speechSynthesis.getVoices();
         const normalizedLang = (langCode || 'en-US').toLowerCase();
+        const shortLang = normalizedLang.split('-')[0];
 
-        return voices.find(voice => voice.lang && voice.lang.toLowerCase() === normalizedLang)
-            || voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith(normalizedLang.split('-')[0]))
-            || voices.find(voice => /female|woman|samantha|zira|aria|victoria|google us english/i.test(voice.name))
+        const languageMatches = voices.filter(voice => {
+            const voiceLang = (voice.lang || '').toLowerCase();
+            return voiceLang === normalizedLang || voiceLang.startsWith(shortLang + '-');
+        });
+
+        const femaleVoice = languageMatches.find(voice => /female|woman|girl|samantha|zira|aria|victoria|susan|jenny|google us english/i.test(voice.name))
+            || voices.find(voice => /female|woman|girl|samantha|zira|aria|victoria|susan|jenny|google us english/i.test(voice.name));
+
+        return femaleVoice
+            || languageMatches[0]
             || voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith('en'))
-            || voices[0] || null;
+            || voices[0]
+            || null;
     }
 
     function speakInstruction(text, langCode = 'en-US') {
         if (!ensureSpeechReady() || !text) return;
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = langCode;
-        utterance.rate = 0.9;
+        const speakNow = () => {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = langCode;
+            utterance.rate = 0.9;
 
-        const preferredVoice = getPreferredVoice(langCode);
-        if (preferredVoice) {
-            utterance.voice = preferredVoice;
+            const preferredVoice = getPreferredVoice(langCode);
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
+            }
+
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        };
+
+        if (window.speechSynthesis.getVoices().length === 0) {
+            const onVoicesReady = () => {
+                window.speechSynthesis.onvoiceschanged = null;
+                speakNow();
+            };
+
+            window.speechSynthesis.onvoiceschanged = onVoicesReady;
+            return;
         }
 
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utterance);
+        speakNow();
     }
 
     function speakDragInstruction() {
