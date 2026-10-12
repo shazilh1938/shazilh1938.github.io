@@ -399,20 +399,19 @@
     <!-- MAIN MENU SCREEN -->
     <div id="main-menu">
         <h2>Select a Game Mode:</h2>
-
+        
         <div style="margin-bottom: 18px;">
-            <h3 style="margin: 0 0 8px; color: #2c3e50;">Face</h3>
-            <button onclick="startDragDropGame('en2fr', 'face')" style="background-color: #8e44ad;">🧩 Face - English to French</button><br>
-            <button onclick="startDragDropGame('fr2en', 'face')" style="background-color: #6c5ce7;">🧩 Face - French to English</button><br>
+            <!-- <h2 style="margin: 0 0 8px; color: #2c3e50;">Le corps (The body)</h2> -->
+            <button onclick="startDragDropGame('en2fr', 'body')" style="background-color: #8e44ad;">🧩 Le corps (The body) - English to French</button><br>
+            <button onclick="startDragDropGame('fr2en', 'body')" style="background-color: #6c5ce7;">🧩 Le corps (The body) - French to English</button><br>
+            <button onclick="showLearningMode('body')" style="background-color: #2ecc71;">📚 Le corps (The body) - Learning Mode</button>
         </div>
-
         <div style="margin-bottom: 18px;">
-            <h3 style="margin: 0 0 8px; color: #2c3e50;">Body</h3>
-            <button onclick="startDragDropGame('en2fr', 'body')" style="background-color: #8e44ad;">🧩 Body - English to French</button><br>
-            <button onclick="startDragDropGame('fr2en', 'body')" style="background-color: #6c5ce7;">🧩 Body - French to English</button><br>
+            <!-- <h2 style="margin: 0 0 8px; color: #2c3e50;">Le visage (The face)</h2> -->
+            <button onclick="startDragDropGame('en2fr', 'face')" style="background-color: #8e44ad;">🧩 Le visage (The face) - English to French</button><br>
+            <button onclick="startDragDropGame('fr2en', 'face')" style="background-color: #6c5ce7;">🧩 Le visage (The face) - French to English</button><br>
+            <button onclick="showLearningMode('face')" style="background-color: #2ecc71;">📚 Le visage (The face) - Learning Mode</button>
         </div>
-
-        <button onclick="showLearningMode()" style="background-color: #2ecc71;">📚 Learning Mode</button>
     </div>
 
     <!-- LEARNING MODE SCREEN -->
@@ -723,15 +722,15 @@
         nextQuestion();
     }
 
-    function showLearningMode() {
-        buildLearningMode();
+    function showLearningMode(category = 'face') {
+        buildLearningMode(category);
         hideAllScreens();
         setScreenVisibility('learning-screen', true);
     }
 
-    function buildLearningMode() {
-        const allWords = [...faceData, ...bodyData];
-        const vocabularyPairs = [...new Map(allWords.map(item => [item.fr, item])).values()];
+    function buildLearningMode(category = 'face') {
+        const words = category === 'body' ? bodyData : faceData;
+        const vocabularyPairs = [...new Map(words.map(item => [item.fr, item])).values()];
         const learningGrid = document.getElementById('learning-grid');
 
         learningGrid.innerHTML = vocabularyPairs.map(pair => `
