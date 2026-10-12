@@ -514,32 +514,44 @@
 
     function syncDragLeftOrder() {
         const getTargetValue = (pair) => (dragGameState.mode === 'en2fr' ? pair.fr : pair.en);
-        const getAnswerValue = (pair) => (dragGameState.mode === 'en2fr' ? pair.en : pair.fr);
-        const matchedTargetValues = new Set(dragGameState.matched.map(getTargetValue));
+
+        if (!dragGameState.leftOrder.length) {
+            dragGameState.leftOrder = shuffle(dragGameState.pairs.map(getTargetValue));
+        }
 
         const remainingTargets = dragGameState.pairs
             .filter(pair => !dragGameState.matched.some(matched => matched.fr === pair.fr && matched.en === pair.en))
             .map(getTargetValue);
 
-        dragGameState.leftOrder = dragGameState.pairs.map((pair) => {
-            const value = getTargetValue(pair);
-            return matchedTargetValues.has(value) ? value : remainingTargets.shift();
+        const seen = new Set();
+        dragGameState.leftOrder = dragGameState.leftOrder.filter((value) => {
+            if (seen.has(value)) return false;
+            seen.add(value);
+            return true;
         });
 
-        dragGameState.rightOrder = dragGameState.pairs
-            .filter(pair => !dragGameState.matched.some(matched => matched.fr === pair.fr && matched.en === pair.en))
-            .map(getAnswerValue);
+        remainingTargets.forEach((value) => {
+            if (!seen.has(value)) {
+                dragGameState.leftOrder.push(value);
+                seen.add(value);
+            }
+        });
 
-        if (!dragGameState.matched.length) {
-            dragGameState.rightOrder = shuffle(dragGameState.rightOrder);
+        if (!dragGameState.rightOrder.length) {
+            const getAnswerValue = (pair) => (dragGameState.mode === 'en2fr' ? pair.en : pair.fr);
+            dragGameState.rightOrder = shuffle(
+                dragGameState.pairs
+                    .filter(pair => !dragGameState.matched.some(matched => matched.fr === pair.fr && matched.en === pair.en))
+                    .map(getAnswerValue)
+            );
         }
     }
 
     function reshuffleDragBoard() {
         const getTargetValue = (pair) => (dragGameState.mode === 'en2fr' ? pair.fr : pair.en);
         const getAnswerValue = (pair) => (dragGameState.mode === 'en2fr' ? pair.en : pair.fr);
-        const matchedTargetValues = new Set(dragGameState.matched.map(getTargetValue));
 
+        const matchedTargets = new Set(dragGameState.matched.map(getTargetValue));
         const remainingTargets = shuffle(
             dragGameState.pairs
                 .filter(pair => !dragGameState.matched.some(matched => matched.fr === pair.fr && matched.en === pair.en))
@@ -551,11 +563,8 @@
                 .map(getAnswerValue)
         );
 
-        dragGameState.leftOrder = dragGameState.pairs.map((pair) => {
-            const value = getTargetValue(pair);
-            return matchedTargetValues.has(value) ? value : remainingTargets.shift();
-        });
-
+        const preservedEntries = dragGameState.leftOrder.filter((value) => matchedTargets.has(value));
+        dragGameState.leftOrder = [...preservedEntries, ...remainingTargets];
         dragGameState.rightOrder = remainingAnswers;
         renderDragDropBoard();
     }
@@ -769,9 +778,11 @@
         dragGameState.correct = 0;
         dragGameState.wrong = 0;
         dragGameState.total = dragGameState.pairs.length;
-        dragGameState.leftOrder = [];
-        dragGameState.rightOrder = [];
-        syncDragLeftOrder();
+
+        const getTargetValue = (pair) => (mode === 'en2fr' ? pair.fr : pair.en);
+        const getAnswerValue = (pair) => (mode === 'en2fr' ? pair.en : pair.fr);
+        dragGameState.leftOrder = shuffle(dragGameState.pairs.map(getTargetValue));
+        dragGameState.rightOrder = shuffle(dragGameState.pairs.map(getAnswerValue));
 
         const title = document.getElementById('drag-game-title');
         const leftLabel = document.getElementById('drag-left-label');
@@ -885,7 +896,7 @@
         if (matchingPair) {
             dragGameState.matched.push(matchingPair);
             dragGameState.correct++;
-            syncDragLeftOrder();
+            dragGameState.rightOrder = dragGameState.rightOrder.filter(word => word !== droppedWord);
             setTimeout(() => {
                 if ('speechSynthesis' in window) {
                     speakText(matchingPair.fr, 'fr-FR');
