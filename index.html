@@ -1361,10 +1361,22 @@
         }
 
         dragGameState.wrong++;
-        const wrongItem = `${targetWord} → ${droppedWord}`;
-        const alreadyTracked = dragGameState.wrongWords.some(item => item === wrongItem);
+        const correctAnswer = dragGameState.mode === 'en2fr'
+            ? dragGameState.pairs.find(pair => pair.fr === targetWord)?.en
+            : dragGameState.pairs.find(pair => pair.en === targetWord)?.fr;
+
+        const wrongEntry = {
+            targetWord,
+            selectedWord: droppedWord,
+            correctWord: correctAnswer || 'unknown'
+        };
+
+        const alreadyTracked = dragGameState.wrongWords.some(
+            item => item.targetWord === wrongEntry.targetWord && item.selectedWord === wrongEntry.selectedWord
+        );
+
         if (!alreadyTracked) {
-            dragGameState.wrongWords.push(wrongItem);
+            dragGameState.wrongWords.push(wrongEntry);
         }
         await speakText('Sorry, try again', 'en-US');
         await playErrorTone();
@@ -1485,12 +1497,12 @@
         if (wrongSummary) {
             if (dragGameState.wrongWords.length > 0) {
                 wrongSummary.innerHTML = `
-                    <h3>Words missed this round</h3>
-                    <ul>${dragGameState.wrongWords.map((word) => `<li>${word}</li>`).join('')}</ul>
+                    <h3>Wrong Words</h3>
+                    <ul>${dragGameState.wrongWords.map((item) => `<li>Selected: "${item.selectedWord}" for "${item.targetWord}" — correct word: "${item.correctWord}"</li>`).join('')}</ul>
                 `;
             } else {
                 wrongSummary.innerHTML = `
-                    <h3>Words missed this round</h3>
+                    <h3>Wrong Words</h3>
                     <p style="margin: 0; color: #27ae60; font-weight: 700;">None — great job!</p>
                 `;
             }
