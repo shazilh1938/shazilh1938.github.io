@@ -559,9 +559,36 @@
         rightOrder: []
     };
 
+    const HIDE_CORRECT_ANSWERS_KEY = 'superkidz-hide-correct-answers';
+
+    function persistHideCorrectAnswersPreference(checked) {
+        try {
+            window.sessionStorage.setItem(HIDE_CORRECT_ANSWERS_KEY, String(Boolean(checked)));
+        } catch (error) {
+            console.log('Unable to persist hide correct answers preference:', error);
+        }
+    }
+
+    function syncHideCorrectAnswerToggleState(checked) {
+        const checkbox = document.getElementById('hide-correct-answers-toggle');
+        if (checkbox) {
+            checkbox.checked = Boolean(checked);
+        }
+        persistHideCorrectAnswersPreference(Boolean(checked));
+    }
+
     function getHideCorrectAnswersChecked() {
         const checkbox = document.getElementById('hide-correct-answers-toggle');
-        return checkbox ? checkbox.checked : false;
+        if (checkbox) {
+            return checkbox.checked;
+        }
+
+        try {
+            const stored = window.sessionStorage.getItem(HIDE_CORRECT_ANSWERS_KEY);
+            return stored === 'true';
+        } catch (error) {
+            return false;
+        }
     }
 
     function syncDragLeftOrder() {
@@ -833,7 +860,7 @@
 
         const hideCheckbox = document.getElementById('hide-correct-answers-toggle');
         if (hideCheckbox) {
-            hideCheckbox.checked = false;
+            hideCheckbox.checked = getHideCorrectAnswersChecked();
         }
 
         const getTargetValue = (pair) => (mode === 'en2fr' ? pair.fr : pair.en);
@@ -1308,7 +1335,9 @@
 
     const hideCorrectAnswerToggle = document.getElementById('hide-correct-answers-toggle');
     if (hideCorrectAnswerToggle) {
-        hideCorrectAnswerToggle.addEventListener('change', () => {
+        hideCorrectAnswerToggle.checked = getHideCorrectAnswersChecked();
+        hideCorrectAnswerToggle.addEventListener('change', (event) => {
+            syncHideCorrectAnswerToggleState(event.target.checked);
             renderDragDropBoard();
         });
     }
