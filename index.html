@@ -457,10 +457,41 @@
                 gap: 8px;
             }
 
+            .drag-toolbar {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .drag-toolbar > * {
+                width: 100%;
+                margin: 0;
+            }
+
+            .hide-correct-toggle {
+                justify-content: center;
+                width: 100%;
+                font-size: 16px;
+                padding: 12px 10px;
+            }
+
+            .small-action-btn {
+                margin: 0;
+            }
+
             button {
                 font-size: 18px;
                 padding: 12px 18px;
                 min-height: 44px;
+                height: auto;
+                width: 100%;
+                margin: 0;
+            }
+
+            .learning-grid,
+            .word-list {
+                gap: 10px;
             }
 
             .pair-row,
@@ -476,6 +507,8 @@
             .word-chip {
                 font-size: 18px;
                 padding: 10px 14px;
+                width: fit-content;
+                max-width: 100%;
             }
 
             .draggable-word {
@@ -490,14 +523,29 @@
                 font-size: 18px;
             }
 
+            #drag-french-list,
+            #drag-english-list {
+                justify-content: flex-start;
+            }
+
+            .instruction-card {
+                width: min(92%, 700px);
+                padding: 22px 18px 18px;
+            }
+
+            .instruction-card p {
+                font-size: 20px;
+                margin: 16px 8px;
+            }
+
             input[type="text"] {
                 width: 90%;
                 font-size: 22px;
             }
 
-            #drag-french-list,
-            #drag-english-list {
-                justify-content: flex-start;
+            canvas {
+                width: min(100%, 450px);
+                height: auto;
             }
         }
     </style>
