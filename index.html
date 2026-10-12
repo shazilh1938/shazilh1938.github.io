@@ -656,7 +656,7 @@
 <div id="drag-instructions-overlay" class="instruction-overlay hidden">
     <div class="instruction-card">
         <h3>Instructions</h3>
-        <p id="drag-instruction-text">Welcome to Drag and Drop - English to French Game. Please drag the English word on the right hand side to match with the French word on the left hand side.</p>
+        <p id="drag-instruction-text">Welcome to Drag and Drop - English to French Game. Please drag the English word on the right-hand side to match with the French word on the left-hand side.</p>
         <button onclick="closeDragInstructions()" style="background-color: #ae3ce7; font-size: 20px; padding: 12px 24px;">Dismiss</button>
     </div>
 </div>
@@ -751,7 +751,7 @@
         if (!grid || !submenus) return;
 
         grid.innerHTML = topics.map((topic) => `
-            <button class="menu-btn topic-btn" data-topic-key="${topic.key}" onclick="showTopicMenu('${topic.key}')" style="background-color: ${topic.color};">${topic.title}</button>
+            <button class="menu-btn topic-btn" data-topic-key="${topic.key}" onclick="showTopicMenu('${topic.key}'); speakTopicName('${topic.key}');" style="background-color: ${topic.color};">${topic.title}</button>
         `).join('');
 
         submenus.innerHTML = topics.map((topic) => `
@@ -985,8 +985,8 @@
         const mode = dragGameState.mode === 'fr2en' ? 'French to English' : 'English to French';
 
         instructionText.textContent = dragGameState.mode === 'fr2en'
-            ? 'Welcome to Drag and Drop - French to English Game. Please drag the French word on the right hand side to match with the English word on the left hand side.'
-            : 'Welcome to Drag and Drop - English to French Game. Please drag the English word on the right hand side to match with the French word on the left hand side.';
+            ? 'Welcome to Drag and Drop - French to English Game. Please drag the French word on the right-hand side to match with the English word on the left-hand side.'
+            : 'Welcome to Drag and Drop - English to French Game. Please drag the English word on the right-hand side to match with the French word on the left-hand side.';
 
         overlay.classList.remove('hidden');
         speakDragInstruction();
@@ -1094,14 +1094,43 @@
 
     function speakDragInstruction() {
         const text = dragGameState.mode === 'fr2en'
-            ? 'Welcome to Drag and Drop - French to English Game. Please drag the French word on the right hand side to match with the English word on the left hand side.'
-            : 'Welcome to Drag and Drop - English to French Game. Please drag the English word on the right hand side to match with the French word on the left hand side.';
+            ? 'Welcome to Drag and Drop - French to English Game. Please drag the French word on the right-hand side to match with the English word on the left-hand side.'
+            : 'Welcome to Drag and Drop - English to French Game. Please drag the English word on the right-hand side to match with the French word on the left-hand side.';
 
         speakInstruction(text, 'en-US');
     }
 
     function speakLearningInstruction() {
         speakInstruction('Click any word to hear the pronunciation.', 'en-US');
+    }
+
+    async function speakTopicName(topicKey) {
+        const config = getTopicConfig(topicKey);
+        if (!config) return;
+
+        const frenchText = config.shortTitle || config.title;
+        const englishText = config.englishName || config.title;
+
+        await ensureSpeechReady();
+        if (!('speechSynthesis' in window)) return;
+
+        const speakQueued = (text, lang) => {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.rate = 0.9;
+            const preferredVoice = getPreferredVoice(lang);
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
+            }
+            window.speechSynthesis.speak(utterance);
+        };
+
+        window.speechSynthesis.cancel();
+        speakQueued(frenchText, 'fr-FR');
+
+        setTimeout(() => {
+            speakQueued(englishText, 'en-US');
+        }, 550);
     }
 
     async function playLearningWord(word, langCode) {
