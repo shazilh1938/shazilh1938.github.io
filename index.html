@@ -649,7 +649,7 @@
         <button onclick="returnToMenu()">Play Again / Main Menu</button>
     </div>
     <footer class="app-footer">
-        <div>© Copyright SuperKidz · Version 1.0.0 · Release Date: 2026-10-11</div>
+        <div>© Copyright SuperKidz · Version <span id="app-version">1.0.0</span> · Release Date: <span id="app-release-date">2026-10-11</span></div>
     </footer>
 </div>
 
@@ -670,6 +670,17 @@
 </div>
 
 <script>
+    const APP_VERSION = '1.0.1';
+    const APP_RELEASE_DATE = '2026-10-12';
+
+    function updateFooterMeta() {
+        const versionEl = document.getElementById('app-version');
+        const releaseDateEl = document.getElementById('app-release-date');
+
+        if (versionEl) versionEl.textContent = APP_VERSION;
+        if (releaseDateEl) releaseDateEl.textContent = APP_RELEASE_DATE;
+    }
+
     const topics = [
         {
             key: 'body',
@@ -767,6 +778,7 @@
 
     renderTopicMenu();
     applyTopicLabels();
+    updateFooterMeta();
 
     let currentDataset = [];
     let currentTopicKey = 'face';
