@@ -954,8 +954,18 @@
         utterance.rate = 0.9;
 
         const voices = window.speechSynthesis.getVoices();
-        const preferredVoice = voices.find(voice => voice.lang && voice.lang.toLowerCase() === (langCode || 'en-US').toLowerCase())
-            || voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith((langCode || 'en-US').split('-')[0].toLowerCase()));
+        const normalizedLang = (langCode || 'en-US').toLowerCase();
+        const shortLang = normalizedLang.split('-')[0];
+        const matches = voices.filter(voice => {
+            const voiceLang = (voice.lang || '').toLowerCase();
+            return voiceLang === normalizedLang || voiceLang.startsWith(shortLang + '-');
+        });
+
+        const preferredVoice = matches.find(voice => /female|woman|girl|samantha|zira|aria|victoria|susan|jenny|google us english/i.test(voice.name))
+            || matches[0]
+            || voices.find(voice => /female|woman|girl|samantha|zira|aria|victoria|susan|jenny|google us english/i.test(voice.name))
+            || voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith(shortLang))
+            || voices[0];
 
         if (preferredVoice) {
             utterance.voice = preferredVoice;
