@@ -588,7 +588,6 @@
             title: 'Le corps (The body)',
             shortTitle: 'Le corps',
             englishName: 'The body',
-            heading: 'Le corps (The body)',
             color: '#7d5fff',
             words: [
                 { fr: "une tête", en: "head", x: 225, y: 50, textX: 225, textY: 25 },
@@ -618,7 +617,6 @@
             title: 'Le visage (The face)',
             shortTitle: 'Le visage',
             englishName: 'The face',
-            heading: 'Le visage (The face)',
             color: '#00a8a8',
             words: [
                 { fr: "un front", en: "forehead", x: 225, y: 65, textX: 225, textY: 30 },
@@ -640,10 +638,9 @@
     ];
 
     const topicConfig = Object.fromEntries(topics.map((topic) => [topic.key, topic]));
-    const topicMap = topicConfig;
 
     function getTopicConfig(topicKey) {
-        return topicMap[topicKey] || topics[0];
+        return topicConfig[topicKey] || topics[0];
     }
 
     function getTopicWords(topicKey) {
