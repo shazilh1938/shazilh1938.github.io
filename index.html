@@ -474,8 +474,8 @@
             <h2 class="menu-title">Choose a topic</h2>
 
             <div class="topic-grid">
-                <button class="menu-btn topic-btn" onclick="showTopicMenu('body')" style="background-color: #7d5fff;">Le corps (The body)</button>
-                <button class="menu-btn topic-btn" onclick="showTopicMenu('face')" style="background-color: #00a8a8;">Le visage (The face)</button>
+                <button class="menu-btn topic-btn" data-topic-label="body" onclick="showTopicMenu('body')" style="background-color: #7d5fff;">Le corps (The body)</button>
+                <button class="menu-btn topic-btn" data-topic-label="face" onclick="showTopicMenu('face')" style="background-color: #00a8a8;">Le visage (The face)</button>
             </div>
 
             <div id="topic-submenu-body" class="submenu-panel hidden">
@@ -498,7 +498,7 @@
 
     <!-- LEARNING MODE SCREEN -->
     <div id="learning-screen" class="hidden">
-        <h2 id="learning-mode-title">Le corps (The body)</h2>
+        <h2 id="learning-mode-title" data-topic-label="body">Le corps (The body)</h2>
         <button onclick="openLearningInstructions()" style="background-color: #f39c12; font-size: 18px; padding: 10px 20px;">🙋‍♀️ Instructions</button>
         <button onclick="returnToMenu()" style="background-color: #ab41e1; font-size: 18px; padding: 10px 20px;">🏠 Back to Menu</button>
 
@@ -601,6 +601,38 @@
 </div>
 
 <script>
+    const topicConfig = {
+        body: {
+            key: 'body',
+            title: 'Le corps (The body)',
+            shortTitle: 'Le corps',
+            englishName: 'The body',
+            heading: 'Le corps (The body)'
+        },
+        face: {
+            key: 'face',
+            title: 'Le visage (The face)',
+            shortTitle: 'Le visage',
+            englishName: 'The face',
+            heading: 'Le visage (The face)'
+        }
+    };
+
+    function getTopicConfig(topicKey) {
+        return topicConfig[topicKey] || topicConfig.face;
+    }
+
+    function applyTopicLabels() {
+        document.querySelectorAll('[data-topic-label]').forEach((element) => {
+            const config = getTopicConfig(element.dataset.topicLabel);
+            if (config) {
+                element.textContent = config.title;
+            }
+        });
+    }
+
+    applyTopicLabels();
+
     // Vocabulary datasets
     const faceData = [
         { fr: "un front", en: "forehead", x: 225, y: 65, textX: 225, textY: 30 },
@@ -819,9 +851,10 @@
 
     function showLearningMode(category = 'face') {
         const title = document.getElementById('learning-mode-title');
-        const topicName = category === 'body' ? 'Le corps (The body)' : 'Le visage (The face)';
+        const config = getTopicConfig(category);
         if (title) {
-            title.textContent = topicName;
+            title.textContent = config.title;
+            title.dataset.topicLabel = config.key;
         }
         buildLearningMode(category);
         hideAllScreens();
@@ -996,16 +1029,16 @@
         const title = document.getElementById('drag-game-title');
         const leftLabel = document.getElementById('drag-left-label');
         const rightLabel = document.getElementById('drag-right-label');
-        const gameName = category === 'body' ? 'Body' : 'Face';
+        const topic = getTopicConfig(category);
 
         if (mode === 'fr2en') {
-            title.textContent = `🧩 ${gameName} - French to English Game`;
+            title.textContent = `🧩 ${topic.title} - French to English Game`;
             leftLabel.textContent = 'English';
             leftLabel.style.color = '#27ae60';
             rightLabel.textContent = 'French';
             rightLabel.style.color = '#2980b9';
         } else {
-            title.textContent = `🧩 ${gameName} - English to French Game`;
+            title.textContent = `🧩 ${topic.title} - English to French Game`;
             leftLabel.textContent = 'French';
             leftLabel.style.color = '#2980b9';
             rightLabel.textContent = 'English';
