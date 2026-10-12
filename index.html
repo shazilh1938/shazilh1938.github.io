@@ -378,6 +378,27 @@
             margin: 15px 0;
             min-height: 40px;
         }
+        .summary-list {
+            margin: 20px auto 0;
+            width: min(100%, 620px);
+            padding: 16px 18px;
+            border-radius: 14px;
+            background: #f5f7fa;
+            border: 2px solid #dfe6ea;
+            text-align: left;
+            box-sizing: border-box;
+        }
+        .summary-list h3 {
+            margin: 0 0 10px;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+        .summary-list ul {
+            margin: 0;
+            padding-left: 22px;
+            line-height: 1.7;
+            font-size: 20px;
+        }
         .success { color: #27ae60; }
         .error { color: #c0392b; }
         .thumbs-up {
@@ -649,6 +670,7 @@
     <div id="summary-screen" class="hidden">
         <h2>🎉 Game Completed! 🎉</h2>
         <div id="final-stats" style="font-size: 26px; line-height: 1.6; margin: 20px 0;"></div>
+        <div id="wrong-words-summary" class="summary-list hidden"></div>
         <button onclick="returnToMenu()">Play Again / Main Menu</button>
     </div>
     <footer class="app-footer">
@@ -799,6 +821,7 @@
     let score = 0;
     let correctCount = 0;
     let wrongCount = 0;
+    let wrongWords = [];
     let testMode = 'en2fr'; // 'en2fr' or 'fr2en'
     let currentTarget = {};
 
@@ -812,6 +835,7 @@
         correct: 0,
         wrong: 0,
         total: 0,
+        wrongWords: [],
         mode: 'en2fr',
         leftOrder: [],
         rightOrder: []
@@ -963,6 +987,7 @@
         score = 0;
         correctCount = 0;
         wrongCount = 0;
+        wrongWords = [];
 
         hideAllScreens();
         setScreenVisibility('game-screen', true);
@@ -1185,6 +1210,7 @@
         dragGameState.matched = [];
         dragGameState.correct = 0;
         dragGameState.wrong = 0;
+        dragGameState.wrongWords = [];
         dragGameState.total = dragGameState.pairs.length;
 
         const hideCheckbox = document.getElementById('hide-correct-answers-toggle');
@@ -1335,6 +1361,11 @@
         }
 
         dragGameState.wrong++;
+        const wrongItem = `${targetWord} → ${droppedWord}`;
+        const alreadyTracked = dragGameState.wrongWords.some(item => item === wrongItem);
+        if (!alreadyTracked) {
+            dragGameState.wrongWords.push(wrongItem);
+        }
         await speakText('Sorry, try again', 'en-US');
         await playErrorTone();
         renderDragDropBoard();
@@ -1449,6 +1480,22 @@
             Percentage: <strong>${percentage}%</strong><br>
             Final Grade: <strong style="font-size: 36px; color: #2980b9;">${grade}</strong>
         `;
+
+        const wrongSummary = document.getElementById('wrong-words-summary');
+        if (wrongSummary) {
+            if (dragGameState.wrongWords.length > 0) {
+                wrongSummary.innerHTML = `
+                    <h3>Words missed this round</h3>
+                    <ul>${dragGameState.wrongWords.map((word) => `<li>${word}</li>`).join('')}</ul>
+                `;
+            } else {
+                wrongSummary.innerHTML = `
+                    <h3>Words missed this round</h3>
+                    <p style="margin: 0; color: #27ae60; font-weight: 700;">None — great job!</p>
+                `;
+            }
+            wrongSummary.classList.remove('hidden');
+        }
     }
 
     function nextQuestion() {
@@ -1604,6 +1651,7 @@
     function submitAnswer() {
         let userTyped = document.getElementById('user-answer').value.trim().toLowerCase();
         let expected = testMode === 'en2fr' ? currentTarget.fr.toLowerCase() : currentTarget.en.toLowerCase();
+        const promptWord = testMode === 'en2fr' ? currentTarget.en : currentTarget.fr;
 
         // Strip articles optionally or evaluate direct match
         let feedbackArea = document.getElementById('feedback-area');
@@ -1617,6 +1665,12 @@
             speakPraise(randomEncouragement);
         } else {
             wrongCount++;
+            const wrongItem = `${promptWord} → ${expected}`;
+            const alreadyTracked = wrongWords.some((item) => item === wrongItem);
+            if (!alreadyTracked) {
+                wrongWords.push(wrongItem);
+            }
+
             const wrongFeedback = `Not quite! The correct answer was: ${expected}`;
             feedbackArea.innerHTML = `<span class="error">${wrongFeedback}</span>`;
             speakText(wrongFeedback, testMode === 'en2fr' ? 'fr-FR' : 'en-US');
@@ -1662,13 +1716,37 @@
             Final Grade: <strong style="font-size: 36px; color: #2980b9;">${grade}</strong>
         `;
         document.getElementById('final-stats').innerHTML = statsHtml;
+
+        const wrongSummary = document.getElementById('wrong-words-summary');
+        if (wrongSummary) {
+            if (wrongWords.length > 0) {
+                wrongSummary.innerHTML = `
+                    <h3>Words missed this round</h3>
+                    <ul>${wrongWords.map((word) => `<li>${word}</li>`).join('')}</ul>
+                `;
+            } else {
+                wrongSummary.innerHTML = `
+                    <h3>Words missed this round</h3>
+                    <p style="margin: 0; color: #27ae60; font-weight: 700;">None — great job!</p>
+                `;
+            }
+            wrongSummary.classList.remove('hidden');
+        }
     }
 
     function returnToMenu() {
+        wrongWords = [];
+        dragGameState.wrongWords = [];
         hideAllScreens();
         setScreenVisibility('main-menu', true);
         document.querySelectorAll('#main-menu .topic-btn').forEach((button) => button.classList.remove('selected'));
         document.querySelectorAll('#topic-submenus .submenu-panel').forEach((panel) => panel.classList.add('hidden'));
+
+        const wrongSummary = document.getElementById('wrong-words-summary');
+        if (wrongSummary) {
+            wrongSummary.classList.add('hidden');
+            wrongSummary.innerHTML = '';
+        }
     }
 
     const hideCorrectAnswerToggle = document.getElementById('hide-correct-answers-toggle');
