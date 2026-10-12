@@ -1035,6 +1035,11 @@
         return true;
     }
 
+    async function resumeAudioAndSpeechForInteraction() {
+        await ensureAudioReady();
+        await ensureSpeechReady();
+    }
+
     function getPreferredVoice(langCode = 'en-US') {
         if (!('speechSynthesis' in window)) return null;
 
@@ -1227,12 +1232,14 @@
         updateDragScore();
     }
 
-    function handleDragDrop(event) {
+    async function handleDragDrop(event) {
         event.preventDefault();
         const droppedWord = event.dataTransfer.getData('text/plain');
         const targetWord = event.currentTarget.dataset.word;
 
         if (!droppedWord || !targetWord) return;
+
+        await resumeAudioAndSpeechForInteraction();
 
         const matchingPair = dragGameState.pairs.find(pair => {
             const expectedTarget = dragGameState.mode === 'en2fr' ? pair.fr : pair.en;
@@ -1249,7 +1256,7 @@
                     await speakText(matchingPair.fr, 'fr-FR');
                 }
             }, 350);
-            playSuccessTone();
+            await playSuccessTone();
             renderDragDropBoard();
 
             if (dragGameState.matched.length >= dragGameState.total) {
@@ -1259,8 +1266,8 @@
         }
 
         dragGameState.wrong++;
-        speakText('Sorry, try again', 'en-US');
-        playErrorTone();
+        await speakText('Sorry, try again', 'en-US');
+        await playErrorTone();
         renderDragDropBoard();
     }
 
