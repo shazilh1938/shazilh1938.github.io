@@ -502,6 +502,30 @@
         mode: 'en2fr'
     };
 
+    function setScreenVisibility(screenId, isVisible) {
+        const screen = document.getElementById(screenId);
+        if (screen) {
+            screen.classList.toggle('hidden', !isVisible);
+        }
+    }
+
+    function hideAllScreens() {
+        ['main-menu', 'learning-screen', 'game-screen', 'summary-screen', 'drag-drop-screen'].forEach((screenId) => {
+            setScreenVisibility(screenId, false);
+        });
+    }
+
+    function cancelSpeech() {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    function closeInstructionOverlay(overlayId) {
+        cancelSpeech();
+        setScreenVisibility(overlayId, false);
+    }
+
     function shuffle(arr) {
         const newArr = [...arr];
         for (let i = newArr.length - 1; i > 0; i--) {
@@ -521,21 +545,16 @@
         correctCount = 0;
         wrongCount = 0;
 
-        document.getElementById('main-menu').classList.add('hidden');
-        document.getElementById('learning-screen').classList.add('hidden');
-        document.getElementById('summary-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.remove('hidden');
+        hideAllScreens();
+        setScreenVisibility('game-screen', true);
 
         nextQuestion();
     }
 
     function showLearningMode() {
         buildLearningMode();
-        document.getElementById('main-menu').classList.add('hidden');
-        document.getElementById('game-screen').classList.add('hidden');
-        document.getElementById('drag-drop-screen').classList.add('hidden');
-        document.getElementById('summary-screen').classList.add('hidden');
-        document.getElementById('learning-screen').classList.remove('hidden');
+        hideAllScreens();
+        setScreenVisibility('learning-screen', true);
     }
 
     function buildLearningMode() {
@@ -573,10 +592,7 @@
     }
 
     function closeDragInstructions() {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-        }
-        document.getElementById('drag-instructions-overlay').classList.add('hidden');
+        closeInstructionOverlay('drag-instructions-overlay');
     }
 
     function openLearningInstructions() {
@@ -587,10 +603,7 @@
     }
 
     function closeLearningInstructions() {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-        }
-        document.getElementById('learning-instructions-overlay').classList.add('hidden');
+        closeInstructionOverlay('learning-instructions-overlay');
     }
 
     function dismissAnyInstructionOverlay() {
@@ -1137,11 +1150,8 @@
     }
 
     function returnToMenu() {
-        document.getElementById('game-screen').classList.add('hidden');
-        document.getElementById('summary-screen').classList.add('hidden');
-        document.getElementById('learning-screen').classList.add('hidden');
-        document.getElementById('drag-drop-screen').classList.add('hidden');
-        document.getElementById('main-menu').classList.remove('hidden');
+        hideAllScreens();
+        setScreenVisibility('main-menu', true);
     }
 
     if ('speechSynthesis' in window) {
