@@ -684,7 +684,6 @@
     const topics = [
         {
             key: 'body',
-            title: 'Le corps (The body)',
             frenchName: 'Le corps',
             englishName: 'The body',
             color: '#7d5fff',
@@ -713,7 +712,6 @@
         },
         {
             key: 'face',
-            title: 'Le visage (The face)',
             frenchName: 'Le visage',
             englishName: 'The face',
             color: '#00a8a8',
@@ -742,6 +740,18 @@
         return topicConfig[topicKey] || topics[0];
     }
 
+    function getTopicTitle(topic) {
+        if (!topic) return '';
+        const frenchName = topic.frenchName || '';
+        const englishName = topic.englishName || '';
+
+        if (frenchName && englishName) {
+            return `${frenchName} (${englishName})`;
+        }
+
+        return frenchName || englishName || topic.key || '';
+    }
+
     function getTopicWords(topicKey) {
         return getTopicConfig(topicKey).words || [];
     }
@@ -750,7 +760,7 @@
         document.querySelectorAll('[data-topic-label]').forEach((element) => {
             const config = getTopicConfig(element.dataset.topicLabel);
             if (config) {
-                element.textContent = config.title;
+                element.textContent = getTopicTitle(config);
             }
         });
     }
@@ -762,7 +772,7 @@
         if (!grid || !submenus) return;
 
         grid.innerHTML = topics.map((topic) => `
-            <button class="menu-btn topic-btn" data-topic-key="${topic.key}" onclick="showTopicMenu('${topic.key}'); speakTopicName('${topic.key}');" style="background-color: ${topic.color};">${topic.title}</button>
+            <button class="menu-btn topic-btn" data-topic-key="${topic.key}" onclick="showTopicMenu('${topic.key}'); speakTopicName('${topic.key}');" style="background-color: ${topic.color};">${getTopicTitle(topic)}</button>
         `).join('');
 
         submenus.innerHTML = topics.map((topic) => `
@@ -962,7 +972,7 @@
         const title = document.getElementById('learning-mode-title');
         const config = getTopicConfig(category);
         if (title) {
-            title.textContent = config.title;
+            title.textContent = getTopicTitle(config);
             title.dataset.topicLabel = config.key;
         }
         buildLearningMode(category);
@@ -1130,8 +1140,8 @@
         const config = getTopicConfig(topicKey);
         if (!config) return;
 
-        const frenchText = config.frenchName || config.title;
-        const englishText = config.englishName || config.title;
+        const frenchText = config.frenchName || getTopicTitle(config);
+        const englishText = config.englishName || getTopicTitle(config);
 
         await ensureSpeechReady();
         if (!('speechSynthesis' in window)) return;
@@ -1188,15 +1198,16 @@
         const leftLabel = document.getElementById('drag-left-label');
         const rightLabel = document.getElementById('drag-right-label');
         const topic = getTopicConfig(category);
+        const topicTitle = getTopicTitle(topic);
 
         if (mode === 'fr2en') {
-            title.textContent = `🧩 ${topic.title} - French to English Game`;
+            title.textContent = `🧩 ${topicTitle} - French to English Game`;
             leftLabel.textContent = 'English';
             leftLabel.style.color = '#27ae60';
             rightLabel.textContent = 'French';
             rightLabel.style.color = '#2980b9';
         } else {
-            title.textContent = `🧩 ${topic.title} - English to French Game`;
+            title.textContent = `🧩 ${topicTitle} - English to French Game`;
             leftLabel.textContent = 'French';
             leftLabel.style.color = '#2980b9';
             rightLabel.textContent = 'English';
