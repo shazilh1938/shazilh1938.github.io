@@ -621,46 +621,45 @@
         return true;
     }
 
-    function speakDragInstruction() {
-        if (!ensureSpeechReady()) return;
-
-        const text = dragGameState.mode === 'fr2en'
-            ? 'Welcome to Drag and Drop - French to English Game. Please drag the French word on the right hand side to match with the English word on the left hand side.'
-            : 'Welcome to Drag and Drop - English to French Game. Please drag the English word on the right hand side to match with the French word on the left hand side.';
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.9;
+    function getPreferredVoice(langCode = 'en-US') {
+        if (!('speechSynthesis' in window)) return null;
 
         const voices = window.speechSynthesis.getVoices();
-        const femaleVoice = voices.find(voice => /female|woman|samantha|zira|aria|victoria|google us english/i.test(voice.name))
-            || voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith('en'));
+        const normalizedLang = (langCode || 'en-US').toLowerCase();
 
-        if (femaleVoice) {
-            utterance.voice = femaleVoice;
+        return voices.find(voice => voice.lang && voice.lang.toLowerCase() === normalizedLang)
+            || voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith(normalizedLang.split('-')[0]))
+            || voices.find(voice => /female|woman|samantha|zira|aria|victoria|google us english/i.test(voice.name))
+            || voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith('en'))
+            || voices[0] || null;
+    }
+
+    function speakInstruction(text, langCode = 'en-US') {
+        if (!ensureSpeechReady() || !text) return;
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = langCode;
+        utterance.rate = 0.9;
+
+        const preferredVoice = getPreferredVoice(langCode);
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
         }
 
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(utterance);
     }
 
+    function speakDragInstruction() {
+        const text = dragGameState.mode === 'fr2en'
+            ? 'Welcome to Drag and Drop - French to English Game. Please drag the French word on the right hand side to match with the English word on the left hand side.'
+            : 'Welcome to Drag and Drop - English to French Game. Please drag the English word on the right hand side to match with the French word on the left hand side.';
+
+        speakInstruction(text, 'en-US');
+    }
+
     function speakLearningInstruction() {
-        if (!ensureSpeechReady()) return;
-
-        const text = 'Click any word to hear the pronunciation.';
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.9;
-
-        const voices = window.speechSynthesis.getVoices();
-        const femaleVoice = voices.find(voice => /female|woman|samantha|zira|aria|victoria|google us english/i.test(voice.name))
-            || voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith('en'));
-
-        if (femaleVoice) {
-            utterance.voice = femaleVoice;
-        }
-
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utterance);
+        speakInstruction('Click any word to hear the pronunciation.', 'en-US');
     }
 
     function playLearningWord(word, langCode) {
