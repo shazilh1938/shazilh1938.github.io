@@ -1021,12 +1021,12 @@
         }
     }
 
-    function ensureSpeechReady() {
+    async function ensureSpeechReady() {
         if (!('speechSynthesis' in window)) return false;
 
         try {
             if (typeof window.speechSynthesis.resume === 'function') {
-                window.speechSynthesis.resume();
+                await Promise.resolve(window.speechSynthesis.resume());
             }
         } catch (error) {
             console.log('Speech resume was unavailable:', error);
@@ -1099,10 +1099,10 @@
         speakInstruction('Click any word to hear the pronunciation.', 'en-US');
     }
 
-    function playLearningWord(word, langCode) {
-        if (!ensureSpeechReady()) return;
+    async function playLearningWord(word, langCode) {
+        if (!(await ensureSpeechReady())) return;
         window.speechSynthesis.cancel();
-        speakText(word, langCode);
+        await speakText(word, langCode);
     }
 
     function startDragDropGame(mode = 'en2fr', category = 'face') {
@@ -1244,9 +1244,9 @@
             dragGameState.matched.push(matchingPair);
             dragGameState.correct++;
             dragGameState.rightOrder = dragGameState.rightOrder.filter(word => word !== droppedWord);
-            setTimeout(() => {
+            setTimeout(async () => {
                 if ('speechSynthesis' in window) {
-                    speakText(matchingPair.fr, 'fr-FR');
+                    await speakText(matchingPair.fr, 'fr-FR');
                 }
             }, 350);
             playSuccessTone();
@@ -1284,7 +1284,7 @@
 
     let appAudioContext = null;
 
-    function ensureAudioReady() {
+    async function ensureAudioReady() {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         if (!AudioContextClass) return null;
 
@@ -1293,14 +1293,18 @@
         }
 
         if (appAudioContext.state === 'suspended') {
-            appAudioContext.resume();
+            try {
+                await appAudioContext.resume();
+            } catch (error) {
+                console.log('Audio resume failed:', error);
+            }
         }
 
         return appAudioContext;
     }
 
-    function playSuccessTone() {
-        const audioContext = ensureAudioReady();
+    async function playSuccessTone() {
+        const audioContext = await ensureAudioReady();
         if (!audioContext) return;
 
         const notes = [
@@ -1329,8 +1333,8 @@
         });
     }
 
-    function playErrorTone() {
-        const audioContext = ensureAudioReady();
+    async function playErrorTone() {
+        const audioContext = await ensureAudioReady();
         if (!audioContext) return;
 
         const oscillator = audioContext.createOscillator();
@@ -1393,9 +1397,9 @@
         document.getElementById('user-answer').focus();
     }
 
-    function speakText(text, langCode) {
+    async function speakText(text, langCode) {
         if (!('speechSynthesis' in window) || !text) return;
-        if (!ensureSpeechReady()) return;
+        if (!(await ensureSpeechReady())) return;
 
         let utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = langCode || 'en-US';
@@ -1423,13 +1427,13 @@
         window.speechSynthesis.speak(utterance);
     }
 
-    function speakCurrentPrompt() {
+    async function speakCurrentPrompt() {
         if (!('speechSynthesis' in window)) return;
         window.speechSynthesis.cancel(); // Stop any ongoing speech
 
         let textToSpeak = testMode === 'en2fr' ? currentTarget.en : currentTarget.fr;
         let langCode = testMode === 'en2fr' ? 'en-US' : 'fr-FR';
-        speakText(textToSpeak, langCode);
+        await speakText(textToSpeak, langCode);
     }
 
     function drawDiagram(type, target) {
